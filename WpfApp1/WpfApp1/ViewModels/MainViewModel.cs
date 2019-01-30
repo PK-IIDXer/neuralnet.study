@@ -161,6 +161,39 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
+        #region まとめて覚えさせる
+
+        private ViewModelCommand _BatchCommand;
+
+        public ViewModelCommand BatchCommand
+        {
+            get
+            {
+                if (_BatchCommand == null)
+                {
+                    _BatchCommand = new ViewModelCommand(Batch);
+                }
+                return _BatchCommand;
+            }
+        }
+
+        public void Batch()
+        {
+            for (var i = 0; i < 1000; i++)
+            {
+                _Param1= NNModel.GetRandom();
+                _Param2 = NNModel.GetRandom();
+                _Mult = _Param1 * _Param2;
+
+                Back();
+            }
+            Param1 = 0.ToString();
+            Param2 = 0.ToString();
+            Mult = 0.ToString();
+        }
+
+        #endregion
+
         #endregion
     }
 }

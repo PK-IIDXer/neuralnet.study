@@ -12,12 +12,12 @@ namespace WpfApp1.Models
         /// <summary>
         /// 中間層の厚み
         /// </summary>
-        private const int NODE_NUMBER = 10;
+        private const int NODE_NUMBER = 100;
 
         /// <summary>
         /// 学習率
         /// </summary>
-        private const double LEARNING_RATE = 0.01;
+        private const double LEARNING_RATE = 0.001;
         #endregion
 
         #region パラメータ
@@ -49,13 +49,13 @@ namespace WpfApp1.Models
         /// <returns>乗じた結果</returns>
         public double Forward(DenseMatrix input)
         {
-            var v1 = input * W1 + B1;
-            var t1 = new DenseMatrix(1, NODE_NUMBER);
+            var x1 = input * W1 + B1;
+            var a1 = new DenseMatrix(1, NODE_NUMBER);
             for (var i = 0; i < NODE_NUMBER; i++)
             {
-                t1[0, i] = ReLU(v1[0, i]);
+                a1[0, i] = ReLU(x1[0, i]);
             }
-            var x = t1 * W2 + B2;
+            var x = a1 * W2 + B2;
 
             return x[0, 0];
         }
