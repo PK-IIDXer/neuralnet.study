@@ -87,7 +87,7 @@ namespace WpfApp1.Models
             var dLdX1 = new DenseMatrix(1, NODE_NUMBER);
             for (var i = 0; i < NODE_NUMBER; i++)
             {
-                dLdX1[0, i] = Math.Max(0, dLdA1[0, i]);
+                dLdX1[0, i] = dLdA1[0, i] > 0 ? 1 : 0;
             }
             var dLdB1 = dLdX1;
             var dLdW1 = input.Transpose() * dLdX1;
