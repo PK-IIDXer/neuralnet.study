@@ -17,7 +17,7 @@ namespace WpfApp1.Models
         /// <summary>
         /// 学習率
         /// </summary>
-        private const double LEARNING_RATE = 0.001;
+        private const double LEARNING_RATE = 0.0000001;
         #endregion
 
         #region パラメータ
@@ -78,7 +78,7 @@ namespace WpfApp1.Models
             #endregion
 
             var dLdX2 = new DenseMatrix(1);
-            dLdX2[0,0] = Math.Abs(x2[0, 0] - teacher);
+            dLdX2[0,0] = DiffSquareSum(x2[0, 0] - teacher);
 
             var dLdW2 = a1.Transpose() * dLdX2;
             var dLdB2 = dLdX2;
@@ -87,7 +87,7 @@ namespace WpfApp1.Models
             var dLdX1 = new DenseMatrix(1, NODE_NUMBER);
             for (var i = 0; i < NODE_NUMBER; i++)
             {
-                dLdX1[0, i] = dLdA1[0, i] > 0 ? 1 : 0;
+                dLdX1[0, i] = DiffReLu(dLdA1[0, i]);
             }
             var dLdB1 = dLdX1;
             var dLdW1 = input.Transpose() * dLdX1;
@@ -139,7 +139,7 @@ namespace WpfApp1.Models
         /// <returns></returns>
         private double DiffSquareSum(double x)
         {
-            return Math.Abs(x);
+            return x;
         }
         #endregion
 

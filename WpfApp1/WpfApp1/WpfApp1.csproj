@@ -65,7 +65,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\Model.cs" />
+    <Compile Include="Models\NeuralNetModel.cs" />
     <Compile Include="Models\NNModel.cs" />
+    <Compile Include="Utils\Functions.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
