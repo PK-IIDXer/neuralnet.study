@@ -15,29 +15,54 @@ namespace WpfApp1.Utils
     {
         #region 活性化関数
 
-        #region デリゲート関連
+        #region デリゲート
         /// <summary>
-        /// 活性化関数のデリゲート
+        /// 活性化関数
         /// </summary>
-        public delegate DenseMatrix ActivationFt(DenseMatrix denseMatrix);
+        public delegate DenseMatrix Activation(DenseMatrix denseMatrix);
+
+        /// <summary>
+        /// 活性化関数の逆伝播
+        /// </summary>
+        /// <param name="fromLeft">左からの入力</param>
+        /// <param name="fromRight">右からの入力</param>
+        /// <returns>左への出力</returns>
+        public delegate DenseMatrix BackActivation(DenseMatrix fromLeft, DenseMatrix fromRight);
 
         /// <summary>
         /// 引数に指定した活性化関数を取得する
         /// </summary>
-        /// <param name="activator">必要な活性化関数を指定する</param>
+        /// <param name="activation">必要な活性化関数を指定する</param>
         /// <returns>活性化関数</returns>
-        public static ActivationFt GetActivation(Activators activator)
+        public static Activation GetActivation(Activations activation)
         {
-            switch (activator)
+            switch (activation)
             {
-                case Activators.Identity:
+                case Activations.Identity:
                     return Identity;
-                case Activators.SoftMax:
+                case Activations.SoftMax:
                     return SoftMax;
-                case Activators.ReLU:
+                case Activations.ReLU:
                     return ReLU;
-                case Activators.Sigmoid:
+                case Activations.Sigmoid:
                     return Sigmoid;
+                default:
+                    throw new Exception("不明な活性化関数の指定");
+            }
+        }
+
+        public static BackActivation GetBackActivation(Activations activation)
+        {
+            switch (activation)
+            {
+                case Activations.Identity:
+                    return BackIdentity;
+                case Activations.SoftMax:
+                    return BackSoftMax;
+                case Activations.ReLU:
+                    return BackReLU;
+                case Activations.Sigmoid:
+                    return BackSigmoid;
                 default:
                     throw new Exception("不明な活性化関数の指定");
             }
@@ -48,7 +73,7 @@ namespace WpfApp1.Utils
         /// <summary>
         /// 活性化関数の列挙
         /// </summary>
-        public enum Activators
+        public enum Activations
         {
             /// <summary>
             /// ReLU関数
@@ -100,22 +125,28 @@ namespace WpfApp1.Utils
         }
 
         /// <summary>
-        /// ReLU関数の微分
+        /// ReLU関数の逆伝播
         /// </summary>
-        public static DenseMatrix DReLU(DenseMatrix denseMatrix)
+        /// <param name="fromLeft"></param>
+        /// <param name="fromRight"></param>
+        /// <returns></returns>
+        public static DenseMatrix BackReLU(DenseMatrix fromLeft, DenseMatrix fromRight)
         {
             #region 入力チェック
-            if (denseMatrix.RowCount != 1)
+            if (fromLeft.RowCount != 1 || fromRight.RowCount != 1)
                 throw new Exception("ベクトルを入力してください。");
+
+            if (fromLeft.ColumnCount != fromRight.ColumnCount)
+                throw new Exception("入力値エラー");
             #endregion
 
-            var result = new DenseMatrix(1, denseMatrix.ColumnCount);
-            for (var i = 0; i < denseMatrix.ColumnCount; i++)
+            var diff = new DenseMatrix(fromLeft.ColumnCount);
+            for (var i = 0; i < fromLeft.ColumnCount; i++)
             {
-                result[0, i] = DReLU(denseMatrix[0, i]);
+                diff[0, i] = DReLU(fromLeft[0, i]);
             }
 
-            return result;
+            return fromRight * diff;
         }
 
         /// <summary>
@@ -123,7 +154,7 @@ namespace WpfApp1.Utils
         /// </summary>
         public static double DReLU(double x)
         {
-            return x > 1 ? 0 : 1;
+            return x > 1 ? 1 : 0;
         }
         #endregion
 
@@ -156,22 +187,28 @@ namespace WpfApp1.Utils
         }
 
         /// <summary>
-        /// シグモイド関数の微分
+        /// シグモイド関数の逆伝播
         /// </summary>
-        public static DenseMatrix DSigmoid(DenseMatrix denseMatrix)
+        /// <param name="fromLeft">左からの入力</param>
+        /// <param name="fromRight">右からの入力</param>
+        /// <returns>左への出力</returns>
+        public static DenseMatrix BackSigmoid(DenseMatrix fromLeft, DenseMatrix fromRight)
         {
             #region 入力チェック
-            if (denseMatrix.RowCount != 1)
+            if (fromLeft.RowCount != 1 || fromRight.RowCount != 1)
                 throw new Exception("ベクトルを入力してください。");
-            #endregion
 
-            var result = new DenseMatrix(1, denseMatrix.ColumnCount);
-            for (int i = 0; i < denseMatrix.ColumnCount; i++)
+            if (fromLeft.ColumnCount != fromRight.ColumnCount)
+                throw new Exception("入力値エラー");
+            #endregion
+            
+            var diff = new DenseMatrix(fromLeft.ColumnCount);
+            for (int i = 0; i < fromLeft.ColumnCount; i++)
             {
-                result[0, i] = DSigmoid(denseMatrix[0, i]);
+                diff[i, i] = DSigmoid(fromLeft[0, i]);
             }
 
-            return result;
+            return fromRight * diff;
         }
 
         /// <summary>
@@ -179,7 +216,7 @@ namespace WpfApp1.Utils
         /// </summary>
         public static double DSigmoid(double x)
         {
-            return Math.Exp(-x) / (1 + Math.Exp(-x)) / (1 + Math.Exp(-x));
+            return Math.Exp(-x) / ((1 + Math.Exp(-x)) * (1 + Math.Exp(-x)));
         }
         #endregion
 
@@ -204,6 +241,25 @@ namespace WpfApp1.Utils
         public static double Identity(double x)
         {
             return x;
+        }
+
+        /// <summary>
+        /// 恒等関数の逆伝播
+        /// </summary>
+        /// <param name="fromLeft">左からの入力</param>
+        /// <param name="fromRight">右からの入力</param>
+        /// <returns>左への出力</returns>
+        public static DenseMatrix BackIdentity(DenseMatrix fromLeft, DenseMatrix fromRight)
+        {
+            #region 入力チェック
+            if (fromLeft.RowCount != 1 || fromRight.RowCount != 1)
+                throw new Exception("ベクトルを入力してください。");
+
+            if (fromLeft.ColumnCount != fromRight.ColumnCount)
+                throw new Exception("入力値エラー");
+            #endregion
+
+            return fromRight;
         }
         #endregion
 
@@ -281,6 +337,14 @@ namespace WpfApp1.Utils
         public delegate double LossFunction(DenseMatrix predict, DenseMatrix teacher);
 
         /// <summary>
+        /// 損失関数の逆伝播
+        /// </summary>
+        /// <param name="fromLeft">左からの入力</param>
+        /// <param name="teacher">教師データ</param>
+        /// <returns>左への出力</returns>
+        public delegate DenseMatrix BackLossFunction(DenseMatrix fromLeft, DenseMatrix teacher);
+
+        /// <summary>
         /// 引数で指定した損失関数を取得します。
         /// </summary>
         /// <param name="lossFunction">必要な損失関数を指定</param>
@@ -297,9 +361,30 @@ namespace WpfApp1.Utils
                     throw new Exception("不明な損失関数の指定");
             }
         }
+
+        /// <summary>
+        /// 引数で指定しあ尊師つ関数の逆伝播を取得します。
+        /// </summary>
+        /// <param name="lossFunctions">損失関数</param>
+        /// <returns>損失関数の逆伝播</returns>
+        public static BackLossFunction GetBackLossFunction(LossFunctions lossFunctions)
+        {
+            switch (lossFunctions)
+            {
+                case LossFunctions.CrossEntropyError:
+                    return BackCrossEntropyError;
+                case LossFunctions.MeanSquaredError:
+                    return BackMeanSquaredError;
+                default:
+                    throw new Exception("不明な損失関数の指定");
+            }
+        }
         #endregion
 
         #region 列挙
+        /// <summary>
+        /// 損失関数
+        /// </summary>
         public enum LossFunctions
         {
             /// <summary>

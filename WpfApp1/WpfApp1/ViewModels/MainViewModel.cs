@@ -3,6 +3,8 @@ using Livet.Commands;
 
 using WpfApp1.Models;
 using System.Windows;
+using WpfApp1.Utils;
+using System;
 
 namespace WpfApp1.ViewModels
 {
@@ -104,6 +106,20 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
+        #region 損失
+
+        private double _Loss;
+        /// <summary>
+        /// 損失
+        /// </summary>
+        public double Loss
+        {
+            get => _Loss;
+            set => RaisePropertyChangedIfSet(ref _Loss, value);
+        }
+
+        #endregion
+
         #endregion
 
         #region 初期化処理
@@ -134,6 +150,38 @@ namespace WpfApp1.ViewModels
         public void Forward()
         {
             Mult = _model.Forward(_Param1, _Param2).ToString();
+        }
+
+        #endregion
+
+        #region 損失を求める
+
+        private ViewModelCommand _GetLossCommand;
+
+        public ViewModelCommand GetLossCommand
+        {
+            get
+            {
+                if (_GetLossCommand == null)
+                {
+                    _GetLossCommand = new ViewModelCommand(GetLoss);
+                }
+                return _GetLossCommand;
+            }
+        }
+
+        public void GetLoss()
+        {
+            double loss = 0;
+
+            for (int i = 0; i < 10; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    loss += _model.GetLoss(i, j);
+                }
+            }
+            Loss = loss / 100;
         }
 
         #endregion
@@ -179,10 +227,12 @@ namespace WpfApp1.ViewModels
 
         public void Batch()
         {
-            for (var i = 0; i < 1000; i++)
+            Random rnd = new System.Random();
+
+            for (var i = 0; i < 100; i++)
             {
-                _Param1= NNModel.GetRandom();
-                _Param2 = NNModel.GetRandom();
+                _Param1= rnd.Next(10);
+                _Param2 = rnd.Next(10);
                 _Mult = _Param1 * _Param2;
 
                 Back();
@@ -190,6 +240,35 @@ namespace WpfApp1.ViewModels
             Param1 = 0.ToString();
             Param2 = 0.ToString();
             Mult = 0.ToString();
+        }
+
+        #endregion
+
+        #region 初期化
+
+        private ViewModelCommand _InitCommand;
+
+        public ViewModelCommand InitCommand
+        {
+            get
+            {
+                if (_InitCommand == null)
+                {
+                    _InitCommand = new ViewModelCommand(Init);
+                }
+                return _InitCommand;
+            }
+        }
+
+        public void Init()
+        {
+            Initialize();
+            _Param1 = 0;
+            _Param2 = 0;
+            _Mult = 0;
+            RaisePropertyChanged(nameof(Param1));
+            RaisePropertyChanged(nameof(Param2));
+            RaisePropertyChanged(nameof(Mult));
         }
 
         #endregion

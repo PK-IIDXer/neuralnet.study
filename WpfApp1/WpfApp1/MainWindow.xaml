@@ -13,6 +13,11 @@
     </Window.DataContext>
     
     <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Label Content="{Binding Loss}" Width="120" Height="30" FontSize="30" HorizontalContentAlignment="Center"/>
+            <Button Content="損失を求める"
+                    Command="{Binding GetLossCommand}"/>
+        </StackPanel>
         <StackPanel VerticalAlignment="Center">
             <TextBox Text="{Binding Param1}" Height="23" Width="50"/>
             <Label Content="×" HorizontalAlignment="Center"/>
@@ -25,6 +30,8 @@
         <StackPanel VerticalAlignment="Bottom">
             <Button Width="auto" Height="auto" Content="まとめて覚えさせる"
                     Command="{Binding BatchCommand}"/>
+            <Button Width="auto" Height="auto" Content="初期化"
+                    Command="{Binding InitCommand}"/>
         </StackPanel>
     </Grid>
 </Window>

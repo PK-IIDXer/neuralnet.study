@@ -1,13 +1,7 @@
-﻿using Livet;
-using MathNet.Numerics.LinearAlgebra.Double;
+﻿using MathNet.Numerics.LinearAlgebra.Double;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using WpfApp1.Utils;
 
 namespace WpfApp1.Models
@@ -35,17 +29,32 @@ namespace WpfApp1.Models
         /// <summary>
         /// 活性化関数
         /// </summary>
-        private Functions.ActivationFt _ActivationFt { get; set; }
+        private Functions.Activation _Activation { get; set; }
+
+        /// <summary>
+        /// 活性化関数の逆伝播
+        /// </summary>
+        private Functions.BackActivation _BackActivation { get; set; }
 
         /// <summary>
         /// 出力層の活性化関数
         /// </summary>
-        private Functions.ActivationFt _LastActivationFt { get; set; }
+        private Functions.Activation _LastActivation { get; set; }
+
+        /// <summary>
+        /// 出力層の活性化関数の逆伝播
+        /// </summary>
+        private Functions.BackActivation _BackLastActivation { get; set; }
 
         /// <summary>
         /// 損失関数
         /// </summary>
         private Functions.LossFunction _LossFunction { get; set; }
+
+        /// <summary>
+        /// 損失関数の逆伝播
+        /// </summary>
+        private Functions.BackLossFunction _BackLossFunction { get; set; }
         #endregion
 
         #region コンストラクタ
@@ -61,8 +70,8 @@ namespace WpfApp1.Models
         /// 先頭の整数は入力値の次元、末尾の整数は出力値の次元を意味します。
         /// </remarks>
         public NeuralNetModel(List<int> vs,
-            Functions.Activators activator = Functions.Activators.ReLU,
-            Functions.Activators lastActivator = Functions.Activators.SoftMax,
+            Functions.Activations activator = Functions.Activations.ReLU,
+            Functions.Activations lastActivator = Functions.Activations.SoftMax,
             Functions.LossFunctions lossFunction = Functions.LossFunctions.CrossEntropyError)
         {
             #region 引数チェック
@@ -88,11 +97,14 @@ namespace WpfApp1.Models
             #endregion
 
             #region 活性化関数と損失関数
-            _ActivationFt = Functions.GetActivation(activator);
+            _Activation = Functions.GetActivation(activator);
+            _BackActivation = Functions.GetBackActivation(activator);
 
-            _LastActivationFt = Functions.GetActivation(lastActivator);
+            _LastActivation = Functions.GetActivation(lastActivator);
+            _BackLastActivation = Functions.GetBackActivation(lastActivator);
 
             _LossFunction = Functions.GetLossFunction(lossFunction);
+            _BackLossFunction = Functions.GetBackLossFunction(lossFunction);
             #endregion
         }
         #endregion
@@ -113,22 +125,20 @@ namespace WpfApp1.Models
             }
             #endregion
 
-            var ipt = new DenseMatrix(1, input.ColumnCount);
-
             // 一段階ごとの計算結果を保持しておく変数
             var mediumVectors = new List<DenseMatrix>
             {
-                ipt * Weights[0] + Biases[0]
+                input * Weights[0] + Biases[0]
             };
 
             for (int i = 1; i < Weights.Count; i++)
             {
-                var previous = _ActivationFt(mediumVectors.Last());
+                var previous = _Activation(mediumVectors.Last());
                 
                 mediumVectors.Add(previous * Weights[i] + Biases[i]);
             }
 
-            return _LastActivationFt(mediumVectors.Last() * Weights.Last() + Biases.Last());
+            return _LastActivation(mediumVectors.Last());
         }
 
         /// <summary>
@@ -170,31 +180,60 @@ namespace WpfApp1.Models
             #endregion
 
             // 微分を保持する変数
-            var dLdW = new List<DenseMatrix>();
-            var dLdB = new List<DenseMatrix>();
+            var dLdW = new List<DenseMatrix>(new DenseMatrix[Weights.Count]);
+            var dLdB = new List<DenseMatrix>(new DenseMatrix[Biases.Count]);
 
             #region 順伝播
-            var ipt = new DenseMatrix(1, input.ColumnCount);
-
             // 一段階ごとの計算結果を保持しておく変数
-            var mediumVectors = new List<DenseMatrix>
+            var X = new List<DenseMatrix>
             {
-                ipt * Weights[0] + Biases[0]
+                input * Weights[0] + Biases[0]
             };
+            var A = new List<DenseMatrix>
+            {
+                _Activation(X[0])
+            };
+
 
             for (int i = 1; i < Weights.Count; i++)
             {
-                var previous = _ActivationFt(mediumVectors.Last());
+                var previous = _Activation(X.Last());
 
-                mediumVectors.Add(previous * Weights[i] + Biases[i]);
+                X.Add(previous * Weights[i] + Biases[i]);
+                A.Add(_Activation(X.Last()));
             }
 
-            mediumVectors.Add(mediumVectors.Last() * Weights.Last() + Biases.Last());
+            var output = _LastActivation(X.Last());
 
-            var L = _LossFunction(mediumVectors.Last(), teacher);
+            var L = _LossFunction(output, teacher);
             #endregion
+            
+            var BackX = new List<DenseMatrix>(new DenseMatrix[X.Count]);
+            var BackA = new List<DenseMatrix>(new DenseMatrix[A.Count]);
 
-            // todo 逆に伝播していく様をえがいていく
+            var dL = _BackLossFunction(output, teacher);
+            BackX[BackX.Count - 1] = _BackLastActivation(X.Last(), dL);
+            dLdW[Weights.Count - 1] = Functions.BackAffineToWeight(A[Weights.Count - 2], BackX[BackX.Count - 1]);
+            dLdB[Weights.Count - 1] = Functions.BackAffineToBias(BackX[BackX.Count - 1]);
+
+            for (int i = Weights.Count - 2; i > 0; i--)
+            {
+                BackA[i] = Functions.BackAffineToInput(Weights[i + 1], BackX[i + 1]);
+                BackX[i] = _BackActivation(X[i], BackA[i]);
+                dLdW[i] = Functions.BackAffineToWeight(A[i - 1], BackX[i]);
+                dLdB[i] = Functions.BackAffineToBias(BackX[i]);
+            }
+
+            BackA[0] = Functions.BackAffineToInput(Weights[1], BackX[1]);
+            BackX[0] = _BackActivation(X[0], BackA[0]);
+            dLdW[0] = Functions.BackAffineToWeight(input, BackX[0]);
+            dLdB[0] = Functions.BackAffineToBias(BackX[0]);
+
+            for (var i = 0; i < Weights.Count; i++)
+            {
+                Weights[i] -= (DenseMatrix)dLdW[i].Multiply(LEARNING_RATE);
+                Biases[i] -= (DenseMatrix)dLdB[i].Multiply(LEARNING_RATE);
+            }
         }
         #endregion
     }
