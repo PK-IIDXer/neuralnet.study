@@ -14,7 +14,7 @@
     
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
-            <Label Content="{Binding Loss}" Width="120" Height="30" FontSize="30" HorizontalContentAlignment="Center"/>
+            <Label Content="{Binding Loss}" Width="120" Height="30" FontSize="18" HorizontalContentAlignment="Center"/>
             <Button Content="損失を求める"
                     Command="{Binding GetLossCommand}"/>
         </StackPanel>

@@ -12,7 +12,7 @@ namespace WpfApp1.Models
         /// <summary>
         /// 学習率
         /// </summary>
-        private const double LEARNING_RATE = 0.01;
+        private const double LEARNING_RATE = 0.001;
         #endregion
 
         #region プロパティ

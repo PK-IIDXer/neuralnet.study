@@ -14,7 +14,7 @@ namespace WpfApp1.Models
         #region コンストラクタ
         public Model()
         {
-            List<int> vs = new List<int> { 2, 100, 50, 20, 119, 1 };
+            List<int> vs = new List<int> { 2, 100, 100, 1 };
             _neuralNetModel = new NeuralNetModel(
                 vs,
                 Functions.Activations.ReLU,
