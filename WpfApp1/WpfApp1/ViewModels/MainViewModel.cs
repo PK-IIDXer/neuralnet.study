@@ -15,6 +15,7 @@ namespace WpfApp1.ViewModels
         public MainViewModel()
         {
             Initialize();
+            MnistUtils.LoadMnist();
         }
 
         #endregion
