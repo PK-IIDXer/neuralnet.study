@@ -68,6 +68,7 @@
     <Compile Include="Models\NeuralNetModel.cs" />
     <Compile Include="Models\NNModel.cs" />
     <Compile Include="Utils\Functions.cs" />
+    <Compile Include="Utils\MnistImage.cs" />
     <Compile Include="Utils\MnistUtils.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">

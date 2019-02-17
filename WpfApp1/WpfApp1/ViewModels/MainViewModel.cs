@@ -127,6 +127,7 @@ namespace WpfApp1.ViewModels
         public void Initialize()
         {
             _model = new Model();
+            MnistUtils.LoadMnist();
         }
         #endregion
 
