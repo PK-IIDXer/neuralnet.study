@@ -1,6 +1,7 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,7 @@ namespace WpfApp1.Utils
         public static void LoadMnist()
         {
             _MnistImages = MnistImage.Load(MNIST_FILE_PATH, LABEL_FILE_PATH);
+
         }
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace WpfApp1.Utils
 {
@@ -17,12 +18,12 @@ namespace WpfApp1.Utils
         /// <summary>
         /// MNISTデータセットのパス
         /// </summary>
-        private const string MNIST_FILE_PATH = @"C:\Users\hytch\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-images-idx3-ubyte\train-images.idx3-ubyte";
+        private const string MNIST_FILE_PATH = @"C:\Users\h-saito\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-images-idx3-ubyte\train-images.idx3-ubyte";
 
         /// <summary>
         /// ラベルファイルのパス
         /// </summary>
-        private const string LABEL_FILE_PATH = @"C:\Users\hytch\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-labels-idx1-ubyte\train-labels.idx1-ubyte";
+        private const string LABEL_FILE_PATH = @"C:\Users\h-saito\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-labels-idx1-ubyte\train-labels.idx1-ubyte";
         #endregion
 
         #region プロパティ
@@ -47,6 +48,7 @@ namespace WpfApp1.Utils
         public byte Label { get; }
         #endregion
 
+        #region コンストラクタ
         /// <summary>
         /// <see cref="MnistImage"/> コンストラクタ
         /// </summary>
@@ -72,35 +74,16 @@ namespace WpfApp1.Utils
                 }
             }
         }
+        #endregion
 
-        /// <summary>
-        /// ベクトルに変換します
-        /// </summary>
-        /// <returns>ベクトル</returns>
-        public Vector<double> ToVector()
-        {
-            var flatten = Pixels.SelectMany(row => row)
-                .Select(b => Convert.ToDouble(b));
-            var vector = Vector<double>.Build.DenseOfEnumerable(flatten);
-            return vector;
-        }
-
-        /// <summary>
-        /// 行列に変換します。
-        /// </summary>
-        /// <returns></returns>
-        public Matrix<double> ToMatrix()
-        {
-            return Matrix<double>.Build.Dense(Height, Width, (row, col) => Pixels[row][col]);
-        }
-
+        #region staticメソッド
         /// <summary>
         /// MNIST データセットとラベルをロードします。
         /// </summary>
         /// <param name="pixelFilePath">MNIST データセットのパス</param>
         /// <param name="labelFilePath">ラベルのパス</param>
         /// <returns>MnistImageの配列</returns>
-        public static MnistImage[] Load(string pixelFilePath, string labelFilePath)
+        public static MnistImage[] Load(string pixelFilePath = MNIST_FILE_PATH, string labelFilePath = LABEL_FILE_PATH)
         {
             using (var imageStream = File.OpenRead(pixelFilePath))
             using (var labelStream = File.OpenRead(labelFilePath))
@@ -172,5 +155,60 @@ namespace WpfApp1.Utils
             Array.Reverse(intAsBytes);
             return BitConverter.ToInt32(intAsBytes, 0);
         }
+        #endregion
+
+        #region メソッド
+        /// <summary>
+        /// ベクトルに変換します
+        /// </summary>
+        /// <returns>ベクトル</returns>
+        public Vector<double> ToVector()
+        {
+            var flatten = Pixels.SelectMany(row => row)
+                .Select(b => Convert.ToDouble(b));
+            var vector = Vector<double>.Build.DenseOfEnumerable(flatten);
+            return vector;
+        }
+
+        /// <summary>
+        /// 行列に変換します。
+        /// </summary>
+        /// <returns></returns>
+        public Matrix<double> ToMatrix()
+        {
+            return Matrix<double>.Build.Dense(Height, Width, (row, col) => Pixels[row][col]);
+        }
+
+        /// <summary>
+        /// Imageオブジェクトに変換します。
+        /// </summary>
+        /// <returns></returns>
+        public Image ToImage()
+        {
+            ImageConverter imageConverter = new ImageConverter();
+            return (Image)imageConverter.ConvertFrom(Pixels);
+        }
+
+        /// <summary>
+        /// bitmapイメージを作ります。
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap CreateBitmapImage()
+        {
+            Bitmap canvas = new Bitmap(Width, Height);
+
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    int color = (int)Pixels[x][y];
+                    canvas.SetPixel(y, x, Color.FromArgb(255 - color, 255 - color, 255 - color));
+                }
+            }
+
+            return canvas;
+        }
+
+        #endregion
     }
 }

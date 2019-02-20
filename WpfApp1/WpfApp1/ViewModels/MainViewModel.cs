@@ -5,6 +5,8 @@ using WpfApp1.Models;
 using System.Windows;
 using WpfApp1.Utils;
 using System;
+using System.Windows.Media.Imaging;
+using System.Windows.Interop;
 
 namespace WpfApp1.ViewModels
 {
@@ -15,7 +17,6 @@ namespace WpfApp1.ViewModels
         public MainViewModel()
         {
             Initialize();
-            MnistUtils.LoadMnist();
         }
 
         #endregion
@@ -121,13 +122,37 @@ namespace WpfApp1.ViewModels
 
         #endregion
 
+
+        private BitmapSource _Image;
+
+        public BitmapSource Image
+        {
+            get => _Image;
+            set => RaisePropertyChangedIfSet(ref _Image, value);
+        }
+
+
         #endregion
 
         #region 初期化処理
         public void Initialize()
         {
             _model = new Model();
-            MnistUtils.LoadMnist();
+            int num = 1;
+            var mnists = MnistImage.Load();
+            // var cnv = mnists[num].CreateBitmapImage();
+            // var lbl = mnists[num].Label;
+            // cnv.Save(@"C:\Users\h-saito\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-images-idx3-ubyte\" + num + "-" + lbl + ".bmp");
+
+            int count = 0;
+            foreach (var mn in mnists)
+            {
+                var cnv = mn.CreateBitmapImage();
+                var lbl = mn.Label;
+                string path = @"C:\Users\h-saito\Desktop\neuralnet.study\WpfApp1\mnist_dataset\train-images-idx3-ubyte\" + lbl + @"\" + count + ".bmp";
+                cnv.Save(path);
+                count++;
+            }
         }
         #endregion
 

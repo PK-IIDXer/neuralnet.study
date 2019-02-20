@@ -25,8 +25,8 @@
             <Label Content="＝" HorizontalAlignment="Center"/>
             <TextBox Text="{Binding Mult}" Height="23" Width="50"/>
             <Button Width="50" Height="23" Content="順伝播" Command="{Binding ForwardCommand}"/>
-            <Button Width="50" Height="23" Content="逆伝播" Command="{Binding BackCommand}"/>
-        </StackPanel>
+      <Button Width="50" Height="23" Content="逆伝播" Command="{Binding BackCommand}"/>
+    </StackPanel>
         <StackPanel VerticalAlignment="Bottom">
             <Button Width="auto" Height="auto" Content="まとめて覚えさせる"
                     Command="{Binding BatchCommand}"/>
