@@ -12,7 +12,7 @@ namespace WpfApp1.Utils
     /// <summary>
     /// MNISTデータセットの画像を表すオブジェクトを生成するクラス
     /// </summary>
-    class MnistImage
+    public class MnistImage
     {
         #region 定数
         /// <summary>
@@ -144,17 +144,6 @@ namespace WpfApp1.Utils
             }
         }
 
-        /// <summary>
-        /// 整数のビットを逆順にします。
-        /// </summary>
-        /// <param name="value">整数</param>
-        /// <returns>ビットを逆順にした整数</returns>
-        private static int ReverseBytes(int value)
-        {
-            byte[] intAsBytes = BitConverter.GetBytes(value);
-            Array.Reverse(intAsBytes);
-            return BitConverter.ToInt32(intAsBytes, 0);
-        }
         #endregion
 
         #region メソッド
@@ -180,16 +169,6 @@ namespace WpfApp1.Utils
         }
 
         /// <summary>
-        /// Imageオブジェクトに変換します。
-        /// </summary>
-        /// <returns></returns>
-        public Image ToImage()
-        {
-            ImageConverter imageConverter = new ImageConverter();
-            return (Image)imageConverter.ConvertFrom(Pixels);
-        }
-
-        /// <summary>
         /// bitmapイメージを作ります。
         /// </summary>
         /// <returns></returns>
@@ -207,6 +186,22 @@ namespace WpfApp1.Utils
             }
 
             return canvas;
+        }
+
+        #endregion
+
+        #region privateメソッド
+        
+        /// <summary>
+        /// 整数のビットを逆順にします。
+        /// </summary>
+        /// <param name="value">整数</param>
+        /// <returns>ビットを逆順にした整数</returns>
+        private static int ReverseBytes(int value)
+        {
+            byte[] intAsBytes = BitConverter.GetBytes(value);
+            Array.Reverse(intAsBytes);
+            return BitConverter.ToInt32(intAsBytes, 0);
         }
 
         #endregion
