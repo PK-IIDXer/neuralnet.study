@@ -11,7 +11,7 @@ namespace WpfApp1.Utils
     /// <summary>
     /// 共通的な関数つめあわせ
     /// </summary>
-    class Functions
+    public class Functions
     {
         #region 活性化関数
 
@@ -465,7 +465,7 @@ namespace WpfApp1.Utils
 
             for (var i = 0; i < predict.ColumnCount; i++)
             {
-                result -= teacher[0, i] * Math.Log(predict[0, i]);
+                result -= teacher[0, i] * Math.Log(predict[0, i] + double.MinValue);
             }
 
             return result;

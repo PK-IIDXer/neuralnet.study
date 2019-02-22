@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using MathNet.Numerics.LinearAlgebra.Double;
 
 namespace WpfApp1.Utils
 {
@@ -151,12 +152,18 @@ namespace WpfApp1.Utils
         /// ベクトルに変換します
         /// </summary>
         /// <returns>ベクトル</returns>
-        public Vector<double> ToVector()
+        public DenseMatrix ToVector()
         {
-            var flatten = Pixels.SelectMany(row => row)
-                .Select(b => Convert.ToDouble(b));
-            var vector = Vector<double>.Build.DenseOfEnumerable(flatten);
-            return vector;
+            var flatten = new DenseMatrix(1, Width * Height);
+            var count = 0;
+            for (var i = 0; i < Width; i++)
+            {
+                for (var j = 0; j < Height; j++)
+                {
+                    flatten[0, count++] = Pixels[i][j];
+                }
+            }
+            return flatten;
         }
 
         /// <summary>

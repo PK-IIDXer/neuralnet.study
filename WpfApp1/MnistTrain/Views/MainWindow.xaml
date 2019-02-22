@@ -31,10 +31,18 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
 
     </i:Interaction.Triggers>
-    
-    <Grid>
+
+  <Grid>
     <Image HorizontalAlignment="Left" Height="28" VerticalAlignment="Top" Width="28"
            Source="{Binding MnistImageSource}"/>
+    <Button Content="Button" HorizontalAlignment="Left" Margin="220,221,0,0" VerticalAlignment="Top" Width="75"
+            Command="{Binding TaskTestCommand}"/>
 
+
+    <Grid Visibility="{Binding Visibility, ElementName=progressBar}">
+      <Grid Background="Black" Opacity="0.1"/>
+      <TextBlock Height="20" Margin="0,0,0,30" HorizontalAlignment="Center" Text="{Binding ProgressBarComment}"/>
+      <ProgressBar Height="10" IsIndeterminate="True" x:Name="progressBar" Visibility="{Binding ProgressBarVisibility}"/>
+    </Grid>
   </Grid>
 </Window>

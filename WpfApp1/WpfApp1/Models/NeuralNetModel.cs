@@ -6,7 +6,7 @@ using WpfApp1.Utils;
 
 namespace WpfApp1.Models
 {
-    class NeuralNetModel
+    public class NeuralNetModel
     {
         #region 定数
         /// <summary>
